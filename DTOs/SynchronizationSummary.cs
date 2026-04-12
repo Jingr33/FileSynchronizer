@@ -14,7 +14,12 @@ public record SynchronizationSummary
 
     public void IncrementDeletedFiles() => DeletedFiles++;
 
-    public void IncrementRenamedFiles() => RenamedFiles++;
+    public void ApplyRenamedFilesDetection()
+    {
+        RenamedFiles++;
+        NewFiles--;
+        DeletedFiles--;
+    }
 
     public string GetSummaryText()
         => $"Synchronization Summary: {TotalFilesProcessed} files processed - {NewFiles} new, {ModifiedFiles} modified, {DeletedFiles} deleted, {RenamedFiles} renamed.";

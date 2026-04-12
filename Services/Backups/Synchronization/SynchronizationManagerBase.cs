@@ -117,7 +117,7 @@ public abstract class SynchronizationManagerBase(
             FileDataCacheRegistry.Remove(removedItem.Path);
 
             newItems.Remove(potentialRename);
-            _synchronizationsummary.IncrementRenamedFiles();
+            _synchronizationsummary.ApplyRenamedFilesDetection();
         }
     }
 
