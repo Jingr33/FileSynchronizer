@@ -1,5 +1,6 @@
 ﻿using FileSynchronizer.Abstracts.Registries;
 using FileSynchronizer.Abstracts.Synchronization;
+using FileSynchronizer.DTOs;
 using FileSynchronizer.Utilities;
 
 namespace FileSynchronizer.Services.Synchronization;
@@ -17,20 +18,26 @@ public class FullBackupCreationManager(
         var sourceDir = PathHelper.GetSourceFolderPath();
         var destinationDir = PathHelper.GetReplicaFolderPath();
 
-        Directory.CreateDirectory(destinationDir);
-
         CopyDirectory(sourceDir, destinationDir);
         Logger.LogDebug("Complete backup creation process finished successfully.");
     }
 
     private void CopyDirectory(string sourceDir, string destinationDir)
     {
+        Directory.CreateDirectory(destinationDir);
+
         foreach (var file in Directory.GetFiles(sourceDir))
         {
             var destFile = Path.Combine(destinationDir, Path.GetFileName(file));
+
+            if (File.Exists(destFile))
+            {
+                FileAttributesHelper.RemoveReadOnlyAttribute(file);
+            }
+
             File.Copy(file, destFile, overwrite: true);
 
-            FileDataCacheRegistry.AddOrUpdate(FileDataChaceRegistryHelper.GetInitialFileDataCache(destFile));
+            FileDataCacheRegistry.AddOrUpdate(FileDataChaceHelper.CreateFileDataCache(destFile, DirectoryType.Replica));
         }
 
         foreach (var directory in Directory.GetDirectories(sourceDir))

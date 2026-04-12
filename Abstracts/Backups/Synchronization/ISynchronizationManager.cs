@@ -1,4 +1,4 @@
-namespace FileSynchronizer.Abstracts.Synchronization;
+namespace FileSynchronizer.Abstracts.Backups.Synchronization;
 
 public interface ISynchronizationManager
 {

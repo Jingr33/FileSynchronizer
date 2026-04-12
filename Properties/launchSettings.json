@@ -3,12 +3,12 @@
   "profiles": {
     "FileSynchronizer": {
       "commandName": "Project",
-      "commandLineArgs": "-l \"logs/app.log\" -b 1",
+      "commandLineArgs": "-l \"logs/app.log\" -b \"1d\" -d \"1m\"",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "applicationUrl": "http://localhost:5038",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Production"
       }
     }
   }

@@ -1,0 +1,3 @@
+﻿namespace FileSynchronizer.Abstracts.Backups.Synchronization;
+
+public interface IMetadataSynchronizationManager : ISynchronizationManager;

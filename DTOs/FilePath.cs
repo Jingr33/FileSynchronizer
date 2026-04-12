@@ -1,4 +1,5 @@
-﻿using FileSynchronizer.Utilities;
+﻿using FileSynchronizer.Constants;
+using FileSynchronizer.Utilities;
 
 namespace FileSynchronizer.DTOs;
 
@@ -25,6 +26,18 @@ public record FilePath
         var systemSpecificPath = RelativeNormalizedPath.Replace('/', Path.DirectorySeparatorChar);
 
         return Path.Combine(baseDir, systemSpecificPath);
+    }
+
+    public string GetLoggablePath(DirectoryType directoryType)
+    {
+        var prefix = directoryType switch
+        {
+            DirectoryType.Source => FolderNameConstants.SourceFolderName,
+            DirectoryType.Replica => FolderNameConstants.ReplicaFolderName,
+            _ => "UnknownDirectory"
+        };
+
+        return $"{prefix}/{RelativeNormalizedPath}";
     }
 
     public static string GetBaseDirectory(DirectoryType directoryType)

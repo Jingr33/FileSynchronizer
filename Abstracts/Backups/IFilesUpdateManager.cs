@@ -1,6 +1,6 @@
 ﻿namespace FileSynchronizer.Abstracts.Synchronization;
 
-public interface IBackupUpdateManager
+public interface IFilesUpdateManager
 {
     void UpdateBackup();
 }

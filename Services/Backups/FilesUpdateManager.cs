@@ -6,10 +6,10 @@ using FileSynchronizer.Utilities;
 
 namespace FileSynchronizer.Services.Synchronization;
 
-public class BackpUpdateManager(ILogger<BackpUpdateManager> logger, IFileDataCacheRegistry fileDataCacheRegistry)
-    : IBackupUpdateManager
+public class FilesUpdateManager(ILogger<FilesUpdateManager> logger, IFileDataCacheRegistry fileDataCacheRegistry)
+    : IFilesUpdateManager
 {
-    private ILogger<BackpUpdateManager> Logger { get; } = logger;
+    private ILogger<FilesUpdateManager> Logger { get; } = logger;
     private IFileDataCacheRegistry FileDataCacheRegistry { get; } = fileDataCacheRegistry;
 
     public void UpdateBackup()
@@ -20,7 +20,7 @@ public class BackpUpdateManager(ILogger<BackpUpdateManager> logger, IFileDataCac
             {
                 case FileChangeType.New:
                 case FileChangeType.Modified:
-                    CreateBackupFile(fileDataCache);
+                    CopyBackupFileFromSource(fileDataCache);
                     break;
                 case FileChangeType.Deleted:
                     DeleteBackupFile(fileDataCache);
@@ -34,38 +34,57 @@ public class BackpUpdateManager(ILogger<BackpUpdateManager> logger, IFileDataCac
         }
     }
 
-    private void CreateBackupFile(FileDataCache fileDataCache)
+    private void CopyBackupFileFromSource(FileDataCache fileDataCache)
     {
         var sourcePath = fileDataCache.Path.GetSystemSpecificAbsolutePath(DirectoryType.Source);
         var destinationPath = fileDataCache.Path.GetSystemSpecificAbsolutePath(DirectoryType.Replica);
 
+        var sourceLogPath = fileDataCache.Path.GetLoggablePath(DirectoryType.Source);
+
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
+
+            if (File.Exists(destinationPath))
+            {
+                FileAttributesHelper.RemoveReadOnlyAttribute(destinationPath);
+            }
+
             File.Copy(sourcePath, destinationPath, true);
-            Logger.LogInformation($"New {sourcePath} file was detected and backed up in {FolderNameConstants.ReplicaFolderName}.");
+
+            if (fileDataCache.ChangeType == FileChangeType.New)
+            {
+                Logger.LogInformation($"New {sourceLogPath} file was detected and backed up in {FolderNameConstants.ReplicaFolderName} directory.");
+            }
+            else if (fileDataCache.ChangeType == FileChangeType.Modified)
+            {
+                Logger.LogInformation($"Modified file was detected. {sourceLogPath} file is now updated in {FolderNameConstants.ReplicaFolderName} directory.");
+            }
         }
         catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
         {
-            Logger.LogWarning($"It is currently not possible to backup file {sourcePath}. File is probably used by different process or the application lacks necessary permissions to access it.");
+            Logger.LogWarning($"It is currently not possible to backup file {sourceLogPath}. File is probably used by different process or the application lacks necessary permissions to access it.");
         }
     }
 
     private void DeleteBackupFile(FileDataCache fileDataCache)
     {
         var destinationPath = fileDataCache.Path.GetSystemSpecificAbsolutePath(DirectoryType.Replica);
+        var replicaLogPath = fileDataCache.Path.GetLoggablePath(DirectoryType.Replica);
 
         try
         {
             if (File.Exists(destinationPath))
             {
+                FileAttributesHelper.RemoveReadOnlyAttribute(destinationPath);
+
                 File.Delete(destinationPath);
-                Logger.LogInformation($"Deleted {destinationPath} file from {FolderNameConstants.ReplicaFolderName} folder because it was deleted from {FolderNameConstants.SourceFolderName}.");
+                Logger.LogInformation($"Deleted {replicaLogPath} file because it was deleted from {FolderNameConstants.SourceFolderName}.");
             }
         }
         catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
         {
-            Logger.LogWarning($"It is currently not possible to delete file {destinationPath} from {FolderNameConstants.ReplicaFolderName} folder. File is probably used by different process or the application lacks necessary permissions to access it.");
+            Logger.LogWarning($"It is currently not possible to delete file {replicaLogPath}. File is probably used by different process or the application lacks necessary permissions to access it.");
         }
 
         FileDataCacheRegistry.Remove(fileDataCache.Path);
@@ -78,18 +97,29 @@ public class BackpUpdateManager(ILogger<BackpUpdateManager> logger, IFileDataCac
         var newDestinationPath = renamedFileDataCache.Path.GetSystemSpecificAbsolutePath(DirectoryType.Replica);
         var oldDestinationPath = renamedFileDataCache.MovedFrom!.GetSystemSpecificAbsolutePath(DirectoryType.Replica);
 
+        var newReplicaLogPath = renamedFileDataCache.Path.GetLoggablePath(DirectoryType.Replica);
+        var oldReplicaLogPath = renamedFileDataCache.MovedFrom!.GetLoggablePath(DirectoryType.Replica);
+
         try
         {
             if (File.Exists(oldDestinationPath))
             {
+                bool wasReadOnly = FileAttributesHelper.RemoveReadOnlyAttribute(oldDestinationPath);
+
                 Directory.CreateDirectory(Path.GetDirectoryName(newDestinationPath)!);
                 File.Move(oldDestinationPath, newDestinationPath);
-                Logger.LogInformation($"Renamed {oldDestinationPath} file to {newDestinationPath} in {FolderNameConstants.ReplicaFolderName} folder because it was renamed in {FolderNameConstants.SourceFolderName}.");
+
+                if (wasReadOnly)
+                {
+                    FileAttributesHelper.AddReadOnlyAttribute(newDestinationPath);
+                }
+
+                Logger.LogInformation($"Renamed {oldReplicaLogPath} file to {newReplicaLogPath} because it was renamed in {FolderNameConstants.SourceFolderName}.");
             }
         }
         catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
         {
-            Logger.LogWarning($"It is currently not possible to move file {oldDestinationPath} to {newDestinationPath} in {FolderNameConstants.ReplicaFolderName} folder. File is probably used by different process or the application lacks necessary permissions to access it.");
+            Logger.LogWarning($"It is currently not possible to move file {oldReplicaLogPath} to {newReplicaLogPath}. File is probably used by different process or the application lacks necessary permissions to access it.");
         }
 
         CleanUpEmptyDirectories(Path.GetDirectoryName(oldDestinationPath));
@@ -133,5 +163,4 @@ public class BackpUpdateManager(ILogger<BackpUpdateManager> logger, IFileDataCac
             directoryPath = Path.GetDirectoryName(directoryPath);
         }
     }
-
 }

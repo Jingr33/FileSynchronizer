@@ -1,4 +1,5 @@
 ﻿using FileSynchronizer.Abstracts;
+using FileSynchronizer.Abstracts.Backups.Synchronization;
 using FileSynchronizer.Abstracts.Handlers;
 using FileSynchronizer.Abstracts.Jobs;
 using FileSynchronizer.Abstracts.Registries;
@@ -7,6 +8,7 @@ using FileSynchronizer.Configuration;
 using FileSynchronizer.Handlers;
 using FileSynchronizer.Registries;
 using FileSynchronizer.Services;
+using FileSynchronizer.Services.Backups.Synchronization;
 using FileSynchronizer.Services.Jobs;
 using FileSynchronizer.Services.Synchronization;
 
@@ -20,9 +22,10 @@ public static class ServiceCollectionExtensions
             services.AddSingleton(options);
             services.AddSingleton<IApplicationOrchestrator, ApplicationOrchestrator>();
 
-            services.AddSingleton<ISynchronizationManager, SynchronizationManager>();
+            services.AddSingleton<IMetadataSynchronizationManager, MetadataSynchronizatonManager>();
+            services.AddSingleton<IHashSynchronizationManager, HashSynchronizationManager>();
             services.AddSingleton<IFullBackupCreationManager, FullBackupCreationManager>();
-            services.AddSingleton<IBackupUpdateManager, BackpUpdateManager>();
+            services.AddSingleton<IFilesUpdateManager, FilesUpdateManager>();
 
             services.AddSingleton<ISynchronizationJobManager, SynchronizationJobManager>();
 

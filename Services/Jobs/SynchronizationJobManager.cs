@@ -1,7 +1,7 @@
 using FileSynchronizer.Abstracts.Handlers;
 using FileSynchronizer.Abstracts.Jobs;
 using FileSynchronizer.Configuration;
-using FileSynchronizer.Constants;
+using FileSynchronizer.Utilities;
 using Hangfire;
 
 namespace FileSynchronizer.Services.Jobs;
@@ -11,20 +11,20 @@ public class SynchronizationJobManager(ILogger<SynchronizationJobManager> logger
     private ApplicationOptions ApplicationOptions { get; } = applicationOptions;
     private ILogger<SynchronizationJobManager> Logger { get; } = logger;
 
-    public void CreateRecurringJob()
+    public void ScheduleInitialJobs()
     {
-        RecurringJob.AddOrUpdate<ISynchronizationJobHandler>(
-            HangfireJobIdConstants.SynchronizationJobId,
-            handler => handler.ExecuteSynchronizationJob(),
-            $"*/{ApplicationOptions.BackupPeriod} * * * *"
-        );
+        if (!string.IsNullOrWhiteSpace(ApplicationOptions.BackupInterval))
+        {
+            var nextMetadataSyncExecution = IntervalParser.ParseToTimeSpan(ApplicationOptions.BackupInterval);
+            BackgroundJob.Schedule<ISynchronizationJobHandler>(handler => handler.ExecuteSynchronizationJob(), nextMetadataSyncExecution);
+            Logger.LogInformation($"Metadata synchronization will be executed every {IntervalParser.GetReadableInterval(ApplicationOptions.BackupInterval)}.");
+        }
 
-        Logger.LogDebug($"Created recurring job with id {HangfireJobIdConstants.SynchronizationJobId}");
-    }
-
-    public void TriggerJob()
-    {
-        RecurringJob.TriggerJob(HangfireJobIdConstants.SynchronizationJobId);
-        Logger.LogDebug($"Triggered job with id {HangfireJobIdConstants.SynchronizationJobId}");
+        if (!string.IsNullOrWhiteSpace(ApplicationOptions.DeepBackupInterval))
+        {
+            var nextHashSyncExecution = IntervalParser.ParseToTimeSpan(ApplicationOptions.DeepBackupInterval);
+            BackgroundJob.Schedule<ISynchronizationJobHandler>(handler => handler.ExecuteDeepSynchronizationJob(), nextHashSyncExecution);
+            Logger.LogInformation($"Deep hash synchronization will be executed every {IntervalParser.GetReadableInterval(ApplicationOptions.DeepBackupInterval)}.");
+        }
     }
 }

@@ -366,3 +366,7 @@ FodyWeavers.xsd
 source
 replica
 CreateTestData.ps1
+CreateTestScenario.ps1
+
+# Logging
+logs
