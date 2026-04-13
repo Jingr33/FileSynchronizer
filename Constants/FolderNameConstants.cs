@@ -1,8 +1,7 @@
-﻿namespace FileSynchronizer.Constants
+﻿namespace FileSynchronizer.Constants;
+
+public record FolderNameConstants
 {
-    public record FolderNameConstants
-    {
-        public const string SourceFolderName = "source";
-        public const string ReplicaFolderName = "replica";
-    }
+    public const string SourceFolderName = "source";
+    public const string ReplicaFolderName = "replica";
 }

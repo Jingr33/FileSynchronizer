@@ -58,7 +58,7 @@ public class HashSynchronizationManager(
     }
 
     protected override bool AreFilesIdentical(FileDataCache fileDataCache1, FileDataCache fileDataCache2)
-    => fileDataCache1.Hash == fileDataCache2.Hash;
+        => fileDataCache1.HasSameHash(fileDataCache2);
 
     private static long CalculateFileHash(string filePath)
     {

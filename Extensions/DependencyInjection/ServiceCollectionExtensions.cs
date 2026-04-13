@@ -5,11 +5,11 @@ using FileSynchronizer.Abstracts.Jobs;
 using FileSynchronizer.Abstracts.Registries;
 using FileSynchronizer.Abstracts.Synchronization;
 using FileSynchronizer.Configuration;
-using FileSynchronizer.Handlers;
-using FileSynchronizer.Registries;
 using FileSynchronizer.Services;
 using FileSynchronizer.Services.Backups.Synchronization;
+using FileSynchronizer.Services.Handlers;
 using FileSynchronizer.Services.Jobs;
+using FileSynchronizer.Services.Registries;
 using FileSynchronizer.Services.Synchronization;
 
 namespace FileSynchronizer.Extensions.DependencyInjection;

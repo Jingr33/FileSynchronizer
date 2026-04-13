@@ -5,7 +5,7 @@ using FileSynchronizer.Configuration;
 using FileSynchronizer.Utilities;
 using Hangfire;
 
-namespace FileSynchronizer.Handlers;
+namespace FileSynchronizer.Services.Handlers;
 
 public class SynchronizationJobHandler(
     ILogger<SynchronizationJobHandler> logger,
@@ -42,7 +42,7 @@ public class SynchronizationJobHandler(
         ExecuteSpecificSynchronization(HashSynchronizationManager);
         Logger.LogInformation("Deep hash based synchronization completed.");
 
-        var delay = IntervalParser.ParseToTimeSpan(ApplicationOptions.DeepBackupInterval);
+        var delay = IntervalParser.ParseToTimeSpan(ApplicationOptions.DeepBackupInterval!);
         BackgroundJobClient.Schedule<ISynchronizationJobHandler>(h => h.ExecuteDeepSynchronizationJob(), delay);
         Logger.LogInformation($"Next deep hash based synchronization will be executed in {IntervalParser.GetReadableInterval(ApplicationOptions.DeepBackupInterval!)}.");
     }

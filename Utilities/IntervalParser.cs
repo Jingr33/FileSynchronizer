@@ -14,6 +14,7 @@ public static class IntervalParser
         }
 
         var match = RegexConstants.IntervalRegex.Match(clean);
+
         if (!match.Success)
         {
             return TimeSpan.Zero;

@@ -34,7 +34,7 @@ public record FilePath
         {
             DirectoryType.Source => FolderNameConstants.SourceFolderName,
             DirectoryType.Replica => FolderNameConstants.ReplicaFolderName,
-            _ => "UnknownDirectory"
+            _ => throw new ArgumentException($"Unsupported directory type: {directoryType}")
         };
 
         return $"{prefix}/{RelativeNormalizedPath}";

@@ -1,7 +1,7 @@
 ﻿using FileSynchronizer.Abstracts.Registries;
 using FileSynchronizer.DTOs;
 
-namespace FileSynchronizer.Registries;
+namespace FileSynchronizer.Services.Registries;
 
 public class FileDataCacheRegistry : IFileDataCacheRegistry
 {

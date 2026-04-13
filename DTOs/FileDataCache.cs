@@ -9,13 +9,9 @@ public record FileDataCache
 
     public FileChangeType ChangeType { get; set; } = FileChangeType.Same;
 
-    public bool HasSameMetadata(FileInfo otherFileInfo)
-    {
-        return Size == otherFileInfo.Length && LastModified == otherFileInfo.LastWriteTimeUtc;
-    }
-
     public bool HasSameMetadata(FileDataCache otherCacheItem)
-    {
-        return Size == otherCacheItem.Size && LastModified == otherCacheItem.LastModified;
-    }
+        => Size == otherCacheItem.Size && LastModified == otherCacheItem.LastModified;
+
+    public bool HasSameHash(FileDataCache otherCacheItem)
+        => Hash == otherCacheItem.Hash;
 }

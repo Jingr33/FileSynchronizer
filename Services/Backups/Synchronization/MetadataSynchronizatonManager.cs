@@ -30,5 +30,5 @@ public class MetadataSynchronizatonManager(
         => FileDataChaceHelper.ModifyFileDataCache(baseFileDataCache, changedFileDataCache.Size, changedFileDataCache.LastModified);
 
     protected override bool AreFilesIdentical(FileDataCache fileDataCache1, FileDataCache fileDataCache2)
-    => fileDataCache1!.HasSameMetadata(fileDataCache2);
+        => fileDataCache1!.HasSameMetadata(fileDataCache2);
 }
