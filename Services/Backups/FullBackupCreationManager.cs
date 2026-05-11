@@ -35,7 +35,15 @@ public class FullBackupCreationManager(
                 FileAttributesHelper.RemoveReadOnlyAttribute(file);
             }
 
-            File.Copy(file, destFile, overwrite: true);
+            try
+            {
+                File.Copy(file, destFile, overwrite: true);
+            }
+            catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+            {
+                Logger.LogWarning($"It is currently not possible to move a file {file}. File is probably used by different process or the application lacks necessary permissions to access it.");
+            }
+
 
             FileDataCacheRegistry.AddOrUpdate(FileDataChaceHelper.CreateFileDataCache(destFile, DirectoryType.Replica));
         }
